@@ -11,6 +11,15 @@ const {
   toXOnly,
 } = ordinalsBitcoinjs
 
+const tapTx = {
+  p: "tap",
+  op: "token-transfer",
+  tick: "test",
+  amt: 1
+};
+
+const parsedTapTx = JSON.stringify(tapTx);
+
 describe('bitcoin inscriptions using bitcoinjs', () => {
   const secret = 'fc7458de3d5616e7803fdc81d688b9642641be32fee74c4558ce680cac3d4111'
   const privateKey = Buffer.from(secret, 'hex')
@@ -35,12 +44,16 @@ describe('bitcoin inscriptions using bitcoinjs', () => {
     ).toBeBuffer('02011102abcd')
   })
 
-  test('createCommitTxData of Hello!!', () => {
-    const inscription = createTextInscription({ text: 'Hello!!' })
+  test('createCommitTxData', () => {
+
+    const inscription = createTextInscription({ 
+      text: parsedTapTx
+     })
+
     const commitTxData = createCommitTxData({ publicKey, inscription })
 
     expect(commitTxData).toEqual({
-      cblock: 'c1d734e09fc6ed105225ff316c6fa74f89096f90a437b1c7001af6d0b244d6f151',
+      cblock: 'c0d734e09fc6ed105225ff316c6fa74f89096f90a437b1c7001af6d0b244d6f151',
       script: [
         expect.toBeBuffer('d734e09fc6ed105225ff316c6fa74f89096f90a437b1c7001af6d0b244d6f151'),
         bitcoinjsLib.opcodes.OP_CHECKSIG,
@@ -51,21 +64,21 @@ describe('bitcoin inscriptions using bitcoinjs', () => {
         1,
         expect.toBeBuffer('746578742f706c61696e3b636861727365743d7574662d38'),
         bitcoinjsLib.opcodes.OP_0,
-        expect.toBeBuffer('48656c6c6f2121'),
+        expect.toBeBuffer('7b2270223a22746170222c226f70223a22746f6b656e2d7472616e73666572222c227469636b223a2274657374222c22616d74223a317d'),
         bitcoinjsLib.opcodes.OP_ENDIF,
       ],
       scriptTaproot: expect.any(Object),
-      tapleaf: '13caa908fa38108fa21fcc47e99764ed5da8e579aed0a5af2c50c02257efeee9',
-      tpubkey: 'a56d17d8e7c732e3721c21b1df3a0643c0e4260efb524d01bb0cce1ff4ca0766',
-      revealAddress: 'bc1p54k30k88cuewxusuyxca7wsxg0qwgfswldfy6qdmpn8plax2qanq9wtlsw',
+      tapleaf: '5eec06e26b36c9f18d28bd6106b10d671e2edf622d992e20bf9ee74d14cfcc07',
+      tpubkey: '00ac1f3d4afe29ed54eb4474289aebee9b692f2313c6b9d455898187ab1cf016',
+      revealAddress: 'bc1pqzkp7022lc57648tg36z3xhta6dkjterz0rtn4z43xqc02cu7qtql324nw',
       outputScript: expect.toBeBuffer(
-        '20d734e09fc6ed105225ff316c6fa74f89096f90a437b1c7001af6d0b244d6f151ac0063036f7264010118746578742f706c61696e3b636861727365743d7574662d38000748656c6c6f212168'
+        '20d734e09fc6ed105225ff316c6fa74f89096f90a437b1c7001af6d0b244d6f151ac0063036f7264010118746578742f706c61696e3b636861727365743d7574662d3800377b2270223a22746170222c226f70223a22746f6b656e2d7472616e73666572222c227469636b223a2274657374222c22616d74223a317d68'
       ),
     })
   })
 
-  test('createRevealTx of Hello!!', async () => {
-    const inscription = createTextInscription({ text: 'Hello!!' })
+  test('createRevealTx', async () => {
+    const inscription = createTextInscription({ text: parsedTapTx })
     const commitTxData = createCommitTxData({
       publicKey,
       inscription,
@@ -80,7 +93,7 @@ describe('bitcoin inscriptions using bitcoinjs', () => {
 
     const requiredAmount = 550 + minersFee + padding
 
-    expect(requiredAmount).toEqual(2301)
+    expect(requiredAmount).toEqual(2325)
 
     const commitTxResult = {
       txId: 'd2e8358a8f6257ed6fc5eabe4e85951b702918a7a5d5b79a45e535e1d5d65fb2',
@@ -98,7 +111,7 @@ describe('bitcoin inscriptions using bitcoinjs', () => {
 
     const rawTxWithoutSignature = revelRawTx.rawTx.replace(revelRawTx.signature, '<SIGNATURE>')
     expect(rawTxWithoutSignature).toEqual(
-      '02000000000101b25fd6d5e135e5459ab7d5a5a71829701b95854ebeeac56fed57628f8a35e8d20100000000ffffffff012502000000000000225120c24e41b8ec4d091f9bfbb481fde7ce0808ed820db8e93409cc404da8b9de7e920340<SIGNATURE>4d20d734e09fc6ed105225ff316c6fa74f89096f90a437b1c7001af6d0b244d6f151ac0063036f7264010118746578742f706c61696e3b636861727365743d7574662d38000748656c6c6f21216821c1d734e09fc6ed105225ff316c6fa74f89096f90a437b1c7001af6d0b244d6f15100000000'
+      '02000000000101b25fd6d5e135e5459ab7d5a5a71829701b95854ebeeac56fed57628f8a35e8d20100000000ffffffff012502000000000000225120c24e41b8ec4d091f9bfbb481fde7ce0808ed820db8e93409cc404da8b9de7e920340<SIGNATURE>7d20d734e09fc6ed105225ff316c6fa74f89096f90a437b1c7001af6d0b244d6f151ac0063036f7264010118746578742f706c61696e3b636861727365743d7574662d3800377b2270223a22746170222c226f70223a22746f6b656e2d7472616e73666572222c227469636b223a2274657374222c22616d74223a317d6821c0d734e09fc6ed105225ff316c6fa74f89096f90a437b1c7001af6d0b244d6f15100000000'
     )
 
     expect(revelRawTx).toEqual({
@@ -106,7 +119,7 @@ describe('bitcoin inscriptions using bitcoinjs', () => {
       inscriptionId: 'e79beb0fe7d1aaa6a1ffd589ad95f52c54b1137b9c6620f0fcc56631db8f020ci0',
       rawTx: expect.any(String),
       signature: expect.any(String),
-      virtualSize: 139,
+      virtualSize: 151,
     })
   })
 })
